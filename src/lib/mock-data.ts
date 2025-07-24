@@ -93,7 +93,7 @@ export const mockTools: Tool[] = [
   },
   {
     id: 'tool-3',
-    name: 'Content Assistant',
+    name: 'Muse',
     iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=CA',
     launchUrl: '',
     description: 'AI-powered assistant for writing, summarizing, and brainstorming with documents and images.',
@@ -117,7 +117,7 @@ export const mockTools: Tool[] = [
   },
   {
     id: 'tool-5',
-    name: 'Image Generator',
+    name: 'Artisan',
     iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=IG',
     launchUrl: '',
     description: 'Generate high-quality images from text descriptions using a powerful AI model.',
@@ -129,7 +129,7 @@ export const mockTools: Tool[] = [
   },
   {
     id: 'tool-6',
-    name: 'Document Generator',
+    name: 'Scribe',
     iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=DG',
     launchUrl: '',
     description: 'Create structured documents like reports or essays from a prompt. The output is in Markdown and can be copied or downloaded.',
@@ -141,7 +141,7 @@ export const mockTools: Tool[] = [
   },
   {
     id: 'tool-7',
-    name: 'CSV Generator',
+    name: 'DataGrid',
     iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=CSG',
     launchUrl: '',
     description: 'Generate tabular data in CSV format from a text prompt. The result can be downloaded and opened in any spreadsheet application.',
@@ -193,7 +193,7 @@ export const mockLogs: Log[] = [
    {
     id: 'log-5',
     toolId: 'tool-6',
-    toolName: 'Document Generator',
+    toolName: 'Scribe',
     userId: 'user-1',
     userName: 'Alex Johnson',
     department: 'Dev',
@@ -202,7 +202,7 @@ export const mockLogs: Log[] = [
     {
     id: 'log-6',
     toolId: 'tool-5',
-    toolName: 'Image Generator',
+    toolName: 'Artisan',
     userId: 'user-4',
     userName: 'Sarah Lee',
     department: 'Marketing',

@@ -61,9 +61,9 @@ export default function ToolPlaygroundPage() {
         let initialMessage = `Hello! I'm ${foundTool.name}. How can I help you today?`
         if (foundTool.category === 'Image') {
           initialMessage = `Hello! I'm ${foundTool.name}. Describe the image you want me to create.`
-        } else if (foundTool.name === 'Document Generator') {
+        } else if (foundTool.name === 'Scribe') {
             initialMessage = "Hello! Describe the document you want me to generate. I can create reports, emails, summaries, and more, complete with Markdown formatting."
-        } else if (foundTool.name === 'CSV Generator') {
+        } else if (foundTool.name === 'DataGrid') {
             initialMessage = "Hello! Describe the data you want me to generate. I'll create it in CSV format, ready for any spreadsheet software."
         }
         setMessages([
@@ -241,6 +241,10 @@ export default function ToolPlaygroundPage() {
      )
   }
   
+  if (!tool) {
+    return null; // Don't render if tool is not loaded yet
+  }
+  
   const toggleListening = () => {
     if (!recognitionRef.current) {
         toast({
@@ -265,61 +269,90 @@ export default function ToolPlaygroundPage() {
     });
   };
 
-  const handleDownload = (text: string) => {
-    const isCsv = tool?.name === 'CSV Generator';
-    const filename = `GridAI-${tool?.name}-output.${isCsv ? 'csv' : 'txt'}`;
-    const mimeType = isCsv ? 'text/csv' : 'text/plain';
+  const handleDownload = (content: string) => {
+    const isCsv = tool?.name === 'DataGrid';
+    const isImage = content.startsWith('data:image');
     
-    const blob = new Blob([text], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const filename = `GridAI-${tool?.name || 'output'}.${isCsv ? 'csv' : isImage ? 'png' : 'txt'}`;
+    const mimeType = isCsv ? 'text/csv' : isImage ? 'image/png' : 'text/plain';
+    
+    const blob = isImage 
+      ? fetch(content).then(res => res.blob())
+      : new Blob([content], { type: mimeType });
+
+    Promise.resolve(blob).then(resolvedBlob => {
+      const url = URL.createObjectURL(resolvedBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
   };
 
 
   const renderMessageContent = (message: Message) => {
-    if (typeof message.content === 'string') {
+    const content = message.content;
+    const isAssistant = message.role === 'assistant';
+
+    // Base container for assistant messages to apply group-hover
+    const AssistantContainer = ({ children }: { children: React.ReactNode }) => (
+      <div className="relative group">{children}</div>
+    );
+    
+    // Actions for copy/download
+    const MessageActions = ({ text }: { text: string }) => (
+       <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-muted rounded-bl-md p-1">
+           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCopyToClipboard(text)}>
+              <Copy className="h-3 w-3" />
+              <span className="sr-only">Copy</span>
+          </Button>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDownload(text)}>
+              <Download className="h-3 w-3" />
+              <span className="sr-only">Download</span>
+          </Button>
+      </div>
+    );
+
+
+    if (typeof content === 'string') {
+      const Wrapper = isAssistant ? AssistantContainer : React.Fragment;
       return (
-        <div className="relative group">
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-            {message.role === 'assistant' && (
-                <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-muted rounded-bl-md p-1">
-                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCopyToClipboard(message.content as string)}>
-                        <Copy className="h-3 w-3" />
-                        <span className="sr-only">Copy</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDownload(message.content as string)}>
-                        <Download className="h-3 w-3" />
-                        <span className="sr-only">Download</span>
-                    </Button>
-                </div>
-            )}
-        </div>
+        <Wrapper>
+          <p className="text-sm whitespace-pre-wrap">{content}</p>
+          {isAssistant && <MessageActions text={content} />}
+        </Wrapper>
       );
     }
-    if ('imageUrl' in message.content) {
-      return <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />
+    
+    if ('imageUrl' in content) {
+       const Wrapper = isAssistant ? AssistantContainer : React.Fragment;
+        return (
+            <Wrapper>
+                <Image src={content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />
+                {isAssistant && <MessageActions text={content.imageUrl} />}
+            </Wrapper>
+        );
     }
-    if ('audioUrl' in message.content) {
-        return <audio controls src={message.content.audioUrl} className="w-full" />;
+
+    if ('audioUrl' in content) {
+        return <audio controls src={content.audioUrl} className="w-full" />;
     }
-    if ('file' in message.content) {
-      const isImage = message.content.file.dataUri.startsWith('data:image');
+    
+    if ('file' in content) {
+      const isImage = content.file.dataUri.startsWith('data:image');
       return (
         <div className="space-y-2">
-            {message.content.prompt && <p className="text-sm whitespace-pre-wrap">{message.content.prompt}</p>}
+            {content.prompt && <p className="text-sm whitespace-pre-wrap">{content.prompt}</p>}
             <div className="border-t border-primary-foreground/20 pt-2">
             {isImage ? (
-                <Image src={message.content.file.dataUri} alt={message.content.file.name} width={200} height={200} className="rounded-md" />
+                <Image src={content.file.dataUri} alt={content.file.name} width={200} height={200} className="rounded-md" />
             ) : (
                 <div className="flex items-center gap-2 text-sm rounded-md bg-primary/20 p-2">
                     <Paperclip className="h-4 w-4" />
-                    <span>{message.content.file.name}</span>
+                    <span>{content.file.name}</span>
                 </div>
             )}
             </div>
@@ -333,7 +366,7 @@ export default function ToolPlaygroundPage() {
   return (
     <div className="container mx-auto h-[calc(100vh-100px)] flex flex-col">
       <Card className="flex-1 flex flex-col">
-        <CardHeader>
+        <CardHeader className="flex-col md:flex-row gap-4 items-start">
            <Image
               src={tool.iconUrl}
               alt={`${tool.name} icon`}
@@ -360,7 +393,7 @@ export default function ToolPlaygroundPage() {
                     </Avatar>
                   )}
                   
-                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content === 'object' && !('file' in message.content) && !('audioUrl' in message.content) ? 'p-0 bg-transparent' : 'px-4 py-3'}`}>
+                   <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content === 'object' && ('imageUrl' in message.content) ? 'p-0 bg-transparent' : 'px-4 py-3'}`}>
                      {renderMessageContent(message)}
                   </div>
 
