@@ -5,7 +5,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Tool } from '@/lib/types';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, TestTubeDiagonal } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface ToolCardProps {
   tool: Tool;
@@ -13,10 +15,17 @@ interface ToolCardProps {
 }
 
 export function ToolCard({ tool, onLaunch }: ToolCardProps) {
+  const router = useRouter();
+
   const handleLaunch = () => {
     if (tool.status !== 'active') return;
     onLaunch(tool);
-    window.open(tool.launchUrl, '_blank', 'noopener,noreferrer');
+
+    if (tool.type === 'API-integrated') {
+      router.push(`/tools/${tool.id}`);
+    } else {
+      window.open(tool.launchUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const isActive = tool.status === 'active';
@@ -45,17 +54,21 @@ export function ToolCard({ tool, onLaunch }: ToolCardProps) {
       </CardContent>
       <CardFooter className="flex justify-between">
         <Badge 
-          variant={isActive ? "default" : "destructive"} 
+          variant={isActive ? "default" : "outline"} 
           className={cn(
-            isActive ? 'bg-green-600/20 text-green-400 border-green-500/30' : 'border-transparent bg-destructive/80 text-destructive-foreground',
-            "capitalize"
+            isActive ? 'bg-green-600/20 text-green-400 border-green-500/30' : 'capitalize',
+             !isActive && tool.status === 'inactive' && 'border-transparent bg-destructive/80 text-destructive-foreground'
             )}
         >
           {tool.status}
         </Badge>
         <Button size="sm" onClick={handleLaunch} disabled={!isActive}>
-          Launch
-          <ArrowUpRight className="ml-2 h-4 w-4" />
+           {tool.type === 'API-integrated' ? 'Open' : 'Launch'}
+           {tool.type === 'API-integrated' ? (
+              <TestTubeDiagonal className="ml-2 h-4 w-4" />
+            ) : (
+              <ArrowUpRight className="ml-2 h-4 w-4" />
+            )}
         </Button>
       </CardFooter>
     </Card>
