@@ -1,0 +1,105 @@
+import type { User, Tool, Log } from './types';
+
+export const mockUsers: User[] = [
+  {
+    id: 'user-1',
+    name: 'Alex Johnson',
+    email: 'alex@example.com',
+    department: 'Dev',
+    role: 'admin',
+    assignedTools: [],
+  },
+  {
+    id: 'user-2',
+    name: 'Maria Garcia',
+    email: 'maria@example.com',
+    department: 'Marketing',
+    role: 'employee',
+    assignedTools: ['tool-4'],
+  },
+  {
+    id: 'user-3',
+    name: 'David Smith',
+    email: 'david@example.com',
+    department: 'Sales',
+    role: 'employee',
+    assignedTools: [],
+  },
+];
+
+export const mockTools: Tool[] = [
+  {
+    id: 'tool-1',
+    name: 'ChatGPT',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=GPT',
+    launchUrl: 'https://chat.openai.com/',
+    description: 'A powerful language model for conversation, content creation, and more.',
+    type: 'Web-based',
+    status: 'active',
+    assignedDepartments: ['Dev', 'Marketing'],
+    assignedUsers: [],
+  },
+  {
+    id: 'tool-2',
+    name: 'Fireflies.ai',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=FF',
+    launchUrl: 'https://fireflies.ai/',
+    description: 'AI assistant for your meetings. Records, transcribes, and analyzes voice conversations.',
+    type: 'Web-based',
+    status: 'active',
+    assignedDepartments: ['Sales'],
+    assignedUsers: [],
+  },
+  {
+    id: 'tool-3',
+    name: 'Notion AI',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=N',
+    launchUrl: 'https://www.notion.so/product/ai',
+    description: 'AI features integrated into the Notion workspace for writing, summarizing, and brainstorming.',
+    type: 'API-integrated',
+    status: 'active',
+    assignedDepartments: ['Dev'],
+    assignedUsers: [],
+  },
+  {
+    id: 'tool-4',
+    name: 'Midjourney',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=MJ',
+    launchUrl: 'https://www.midjourney.com/',
+    description: 'An independent research lab exploring new mediums of thought and expanding the imaginative powers of the human species.',
+    type: 'Web-based',
+    status: 'inactive',
+    assignedDepartments: [],
+    assignedUsers: ['user-2'],
+  },
+];
+
+export const mockLogs: Log[] = [
+  {
+    id: 'log-1',
+    toolId: 'tool-1',
+    toolName: 'ChatGPT',
+    userId: 'user-2',
+    userName: 'Maria Garcia',
+    department: 'Marketing',
+    timestamp: new Date('2023-10-26T10:00:00Z'),
+  },
+  {
+    id: 'log-2',
+    toolId: 'tool-2',
+    toolName: 'Fireflies.ai',
+    userId: 'user-3',
+    userName: 'David Smith',
+    department: 'Sales',
+    timestamp: new Date('2023-10-26T11:30:00Z'),
+  },
+  {
+    id: 'log-3',
+    toolId: 'tool-1',
+    toolName: 'ChatGPT',
+    userId: 'user-1',
+    userName: 'Alex Johnson',
+    department: 'Dev',
+    timestamp: new Date('2023-10-27T14:00:00Z'),
+  },
+];
