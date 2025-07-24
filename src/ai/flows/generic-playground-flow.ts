@@ -37,6 +37,10 @@ const prompt = ai.definePrompt({
   output: {schema: GenericPlaygroundOutputSchema},
   prompt: `You are acting as the AI model for the tool: '{{toolName}}'.
   
+  {{#if (eq toolName "Document Generator")}}
+  Please provide a well-structured response using Markdown for formatting (e.g., headings, lists, bold text).
+  {{/if}}
+  
   Respond to the user's prompt naturally, as if you are that tool.
 
   User prompt:

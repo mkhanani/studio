@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
 import { runGenericPlaygroundAction, generateImageAction } from "@/app/actions"
-import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon, Paperclip, X, Mic, MicOff } from "lucide-react"
+import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon, Paperclip, X, Mic, MicOff, Copy, Download } from "lucide-react"
 import Image from "next/image"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
@@ -62,6 +62,8 @@ export default function ToolPlaygroundPage() {
         let initialMessage = `Hello! I'm ${foundTool.name}. How can I help you today?`
         if (foundTool.category === 'Image') {
           initialMessage = `Hello! I'm ${foundTool.name}. Describe the image you want me to create.`
+        } else if (foundTool.name === 'Document Generator') {
+            initialMessage = "Hello! Describe the document you want me to generate. I can create reports, emails, summaries, and more, complete with Markdown formatting."
         }
         setMessages([
           { role: 'assistant', content: initialMessage }
@@ -251,10 +253,46 @@ export default function ToolPlaygroundPage() {
     }
     setIsListening(!isListening);
   };
+  
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+        title: "Copied to clipboard!",
+    });
+  };
+
+  const handleDownload = (text: string, filename: string) => {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
 
   const renderMessageContent = (message: Message) => {
     if (typeof message.content === 'string') {
-      return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
+      return (
+        <div className="relative group">
+            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            {message.role === 'assistant' && (
+                <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-muted rounded-bl-md p-1">
+                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCopyToClipboard(message.content as string)}>
+                        <Copy className="h-3 w-3" />
+                        <span className="sr-only">Copy</span>
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDownload(message.content as string, `${tool?.name}-output.txt`)}>
+                        <Download className="h-3 w-3" />
+                        <span className="sr-only">Download</span>
+                    </Button>
+                </div>
+            )}
+        </div>
+      );
     }
     if ('imageUrl' in message.content) {
       return <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />;
