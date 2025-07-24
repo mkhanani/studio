@@ -10,16 +10,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
 import { runGenericPlaygroundAction, generateImageAction } from "@/app/actions"
-import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon } from "lucide-react"
+import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon, Paperclip, X } from "lucide-react"
 import Image from "next/image"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
+type MessageContent = string | { imageUrl: string } | { prompt: string; file: { name: string, dataUri: string } };
+
 type Message = {
-  role: 'user' | 'assistant'
-  content: string | { imageUrl: string }
-}
+  role: 'user' | 'assistant';
+  content: MessageContent;
+};
 
 export default function ToolPlaygroundPage() {
   const params = useParams()
@@ -34,6 +36,9 @@ export default function ToolPlaygroundPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pageLoading, setPageLoading] = useState(true);
+  const [attachedFile, setAttachedFile] = useState<{name: string, dataUri: string} | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
@@ -69,15 +74,36 @@ export default function ToolPlaygroundPage() {
     }
   }, [messages])
 
-  const handleSend = async () => {
-    if (!prompt.trim() || !tool) return
+ const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        setAttachedFile({ name: file.name, dataUri });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const newMessages: Message[] = [...messages, { role: 'user', content: prompt }]
+  const handleSend = async () => {
+    if ((!prompt.trim() && !attachedFile) || !tool) return
+
+    const userMessageContent: MessageContent = attachedFile 
+        ? { prompt: prompt, file: attachedFile } 
+        : prompt;
+
+    const newMessages: Message[] = [...messages, { role: 'user', content: userMessageContent }]
     setMessages(newMessages)
     setLoading(true)
     setError(null)
     const currentPrompt = prompt
+    const currentFile = attachedFile
     setPrompt("")
+    setAttachedFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
 
     try {
       if (tool.category === 'Image') {
@@ -88,7 +114,11 @@ export default function ToolPlaygroundPage() {
           throw new Error(result.error || "Failed to generate image.")
         }
       } else {
-        const result = await runGenericPlaygroundAction({ prompt: currentPrompt, toolName: tool.name })
+        const result = await runGenericPlaygroundAction({ 
+          prompt: currentPrompt, 
+          toolName: tool.name,
+          fileDataUri: currentFile?.dataUri,
+        })
         if (result.success && result.data) {
           setMessages([...newMessages, { role: 'assistant', content: result.data.response }])
         } else {
@@ -127,7 +157,7 @@ export default function ToolPlaygroundPage() {
             case 'Image':
                 return "A photo of a cat sitting on a windowsill...";
             default:
-                return "Type your message here...";
+                return "Type your message or attach a file...";
         }
    }
 
@@ -155,6 +185,34 @@ export default function ToolPlaygroundPage() {
     // This case should ideally not be reached if error handling is correct
     return null;
   }
+
+  const renderMessageContent = (message: Message) => {
+    if (typeof message.content === 'string') {
+      return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
+    }
+    if ('imageUrl' in message.content) {
+      return <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />;
+    }
+    if ('file' in message.content) {
+      const isImage = message.content.file.dataUri.startsWith('data:image');
+      return (
+        <div className="space-y-2">
+            {message.content.prompt && <p className="text-sm whitespace-pre-wrap">{message.content.prompt}</p>}
+            <div className="border-t border-primary-foreground/20 pt-2">
+            {isImage ? (
+                <Image src={message.content.file.dataUri} alt={message.content.file.name} width={200} height={200} className="rounded-md" />
+            ) : (
+                <div className="flex items-center gap-2 text-sm rounded-md bg-primary/20 p-2">
+                    <Paperclip className="h-4 w-4" />
+                    <span>{message.content.file.name}</span>
+                </div>
+            )}
+            </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
 
   return (
@@ -187,12 +245,8 @@ export default function ToolPlaygroundPage() {
                     </Avatar>
                   )}
                   
-                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content !== 'string' || (typeof message.content === 'string' && message.content.trim() === '') ? 'p-0' : 'px-4 py-3'}`}>
-                    {typeof message.content === 'string' ? (
-                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    ) : message.content && 'imageUrl' in message.content ? (
-                      <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />
-                    ) : null}
+                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content === 'object' && !('imageUrl' in message.content) && !('prompt' in message.content) ? 'p-0' : 'px-4 py-3'}`}>
+                     {renderMessageContent(message)}
                   </div>
 
                    {message.role === 'user' && user && (
@@ -218,20 +272,39 @@ export default function ToolPlaygroundPage() {
              </div>
           </ScrollArea>
         </CardContent>
-        <CardFooter className="pt-6 border-t">
-          <div className="flex w-full items-center space-x-2">
-            <Input 
-                id="prompt" 
-                placeholder={getPlaceholderForCategory(tool.category)}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
-                disabled={loading}
-            />
-            <Button onClick={handleSend} disabled={loading || !prompt.trim()}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : getIconForCategory(tool.category)}
-                <span className="sr-only">Send</span>
-            </Button>
+        <CardFooter className="pt-4 border-t">
+          <div className="w-full space-y-2">
+            {attachedFile && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted p-2 rounded-md">
+                    <Paperclip className="h-4 w-4" />
+                    <span className="flex-1 truncate">{attachedFile.name}</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
+                        setAttachedFile(null);
+                        if(fileInputRef.current) fileInputRef.current.value = "";
+                    }}>
+                        <X className="h-4 w-4"/>
+                    </Button>
+                </div>
+            )}
+            <div className="flex w-full items-center space-x-2">
+                 <Button variant="outline" size="icon" onClick={() => fileInputRef.current?.click()} disabled={loading}>
+                    <Paperclip className="h-4 w-4"/>
+                    <span className="sr-only">Attach file</span>
+                </Button>
+                <Input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                <Input 
+                    id="prompt" 
+                    placeholder={getPlaceholderForCategory(tool.category)}
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
+                    disabled={loading}
+                />
+                <Button onClick={handleSend} disabled={loading || (!prompt.trim() && !attachedFile)}>
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : getIconForCategory(tool.category)}
+                    <span className="sr-only">Send</span>
+                </Button>
+            </div>
           </div>
         </CardFooter>
       </Card>

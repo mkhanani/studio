@@ -16,6 +16,9 @@ import {z} from 'genkit';
 const GenericPlaygroundInputSchema = z.object({
   prompt: z.string().describe('The user input prompt.'),
   toolName: z.string().describe('The name of the tool being used.'),
+  fileDataUri: z.string().optional().describe(
+      "A file, if provided, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 export type GenericPlaygroundInput = z.infer<typeof GenericPlaygroundInputSchema>;
 
@@ -38,6 +41,11 @@ const prompt = ai.definePrompt({
 
   User prompt:
   {{{prompt}}}
+
+  {{#if fileDataUri}}
+  The user has also provided a file for context. Analyze it as part of their request.
+  File: {{media url=fileDataUri}}
+  {{/if}}
   `,
 });
 
