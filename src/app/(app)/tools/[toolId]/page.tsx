@@ -9,8 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
-import { runGenericPlaygroundAction } from "@/app/actions"
-import { Loader2, Send, Bot, User as UserIcon, AlertTriangle } from "lucide-react"
+import { runGenericPlaygroundAction, generateImageAction } from "@/app/actions"
+import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon } from "lucide-react"
 import Image from "next/image"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
@@ -18,7 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 type Message = {
   role: 'user' | 'assistant'
-  content: string
+  content: string | { imageUrl: string }
 }
 
 export default function ToolPlaygroundPage() {
@@ -46,8 +46,12 @@ export default function ToolPlaygroundPage() {
         setError("This tool is web-based and does not have an integrated playground.")
       } else {
         setTool(foundTool)
+        let initialMessage = `Hello! I'm ${foundTool.name}. How can I help you today?`
+        if (foundTool.category === 'Image') {
+          initialMessage = `Hello! I'm ${foundTool.name}. Describe the image you want me to create.`
+        }
         setMessages([
-          { role: 'assistant', content: `Hello! I'm ${foundTool.name}. How can I help you today?` }
+          { role: 'assistant', content: initialMessage }
         ])
       }
     } else {
@@ -76,11 +80,20 @@ export default function ToolPlaygroundPage() {
     setPrompt("")
 
     try {
-      const result = await runGenericPlaygroundAction({ prompt: currentPrompt, toolName: tool.name })
-      if (result.success && result.data) {
-        setMessages([...newMessages, { role: 'assistant', content: result.data.response }])
+      if (tool.category === 'Image') {
+        const result = await generateImageAction({ prompt: currentPrompt })
+        if (result.success && result.data) {
+          setMessages([...newMessages, { role: 'assistant', content: { imageUrl: result.data.imageUrl } }])
+        } else {
+          throw new Error(result.error || "Failed to generate image.")
+        }
       } else {
-        throw new Error(result.error || "Failed to get a response from the AI.")
+        const result = await runGenericPlaygroundAction({ prompt: currentPrompt, toolName: tool.name })
+        if (result.success && result.data) {
+          setMessages([...newMessages, { role: 'assistant', content: result.data.response }])
+        } else {
+          throw new Error(result.error || "Failed to get a response from the AI.")
+        }
       }
     } catch (e: any) {
       setError(e.message)
@@ -154,9 +167,15 @@ export default function ToolPlaygroundPage() {
                         </div>
                     </Avatar>
                   )}
-                  <div className={`rounded-lg px-4 py-3 max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'}`}>
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  
+                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content !== 'string' ? 'p-0' : 'px-4 py-3'}`}>
+                    {typeof message.content === 'string' ? (
+                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    ) : (
+                      <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />
+                    )}
                   </div>
+
                    {message.role === 'user' && user && (
                     <Avatar className="h-9 w-9 border">
                       <AvatarImage src={user.avatarUrl} alt={user.name} />
@@ -184,14 +203,14 @@ export default function ToolPlaygroundPage() {
           <div className="flex w-full items-center space-x-2">
             <Input 
                 id="prompt" 
-                placeholder="Type your message here..." 
+                placeholder={tool.category === 'Image' ? "A photo of a cat sitting on a windowsill..." : "Type your message here..."}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
                 disabled={loading}
             />
             <Button onClick={handleSend} disabled={loading || !prompt.trim()}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (tool.category === 'Image' ? <ImageIcon className="h-4 w-4" /> : <Send className="h-4 w-4" />)}
                 <span className="sr-only">Send</span>
             </Button>
           </div>

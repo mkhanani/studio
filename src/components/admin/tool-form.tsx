@@ -18,18 +18,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tool, User } from "@/lib/types"
+import { Tool, User, ToolCategory } from "@/lib/types"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
   iconUrl: z.string().url("Must be a valid URL."),
-  launchUrl: z.string().url("Must be a valid URL."),
+  launchUrl: z.string().optional(),
   type: z.enum(['Web-based', 'API-integrated']),
+  category: z.enum(['Text', 'Image', 'Audio', 'Web-based']),
   status: z.enum(['active', 'inactive']),
   assignedDepartments: z.array(z.string()),
   assignedUsers: z.array(z.string()),
-})
+}).refine(data => data.type !== 'Web-based' || (data.launchUrl && data.launchUrl.length > 0), {
+  message: "Launch URL is required for Web-based tools.",
+  path: ["launchUrl"],
+});
+
 
 type ToolFormValues = z.infer<typeof formSchema>
 
@@ -37,7 +42,7 @@ interface ToolFormProps {
   onSubmit: (data: Omit<Tool, 'id'>) => void;
   users: User[];
   currentUser: User | null;
-  defaultValues?: Partial<ToolFormValues>;
+  defaultValues?: Partial<Tool>;
 }
 
 export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFormProps) {
@@ -46,9 +51,10 @@ export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFo
     defaultValues: defaultValues || {
       name: "",
       description: "",
-      iconUrl: "",
+      iconUrl: "https://placehold.co/100x100.png",
       launchUrl: "",
       type: "Web-based",
+      category: "Web-based",
       status: "active",
       assignedDepartments: [],
       assignedUsers: [],
@@ -56,12 +62,14 @@ export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFo
   })
   
   const departments = ['Marketing' , 'HR' , 'Dev' , 'Sales' , 'Unassigned'];
+  const categories: ToolCategory[] = ['Text', 'Image', 'Audio', 'Web-based'];
 
   const visibleUsers = currentUser?.role === 'super_admin'
     ? users
     : users.filter(u => u.department === currentUser?.department);
 
   const isSuperAdmin = currentUser?.role === 'super_admin';
+  const toolType = form.watch("type");
 
   return (
     <Form {...form}>
@@ -106,42 +114,79 @@ export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFo
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="launchUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Launch URL</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://example.com/tool" {...field} readOnly={!isSuperAdmin}/>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+           <FormField
+              control={form.control}
+              name="launchUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Launch URL</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="https://example.com/tool" 
+                      {...field} 
+                      readOnly={!isSuperAdmin}
+                      disabled={toolType === 'API-integrated'}
+                      value={toolType === 'API-integrated' ? '' : field.value}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
         </div>
          <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!isSuperAdmin}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Web-based">Web-based</SelectItem>
-                    <SelectItem value="API-integrated">API-integrated</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type</FormLabel>
+                  <Select onValueChange={(value) => {
+                      field.onChange(value);
+                      if (value === 'Web-based') {
+                        form.setValue('category', 'Web-based');
+                      } else {
+                        form.setValue('category', 'Text'); // Default to text for API-integrated
+                      }
+                  }} defaultValue={field.value} disabled={!isSuperAdmin}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Web-based">Web-based</SelectItem>
+                      <SelectItem value="API-integrated">API-integrated</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!isSuperAdmin || toolType === 'Web-based'}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.filter(c => toolType === 'API-integrated' ? c !== 'Web-based' : c === 'Web-based').map(cat => (
+                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+        </div>
+         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="status"

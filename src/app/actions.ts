@@ -2,6 +2,7 @@
 
 import { generateUsageInsights, type GenerateUsageInsightsInput } from '@/ai/flows/generate-usage-insights';
 import { runGenericPlayground, type GenericPlaygroundInput } from '@/ai/flows/generic-playground-flow';
+import { generateImage, type GenerateImageInput } from '@/ai/flows/image-generation-flow';
 
 export async function getUsageInsightsAction(input: GenerateUsageInsightsInput) {
   try {
@@ -21,5 +22,16 @@ export async function runGenericPlaygroundAction(input: GenericPlaygroundInput) 
         console.error(error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         return { success: false, error: `Failed to get response from AI: ${errorMessage}` };
+    }
+}
+
+export async function generateImageAction(input: GenerateImageInput) {
+    try {
+        const result = await generateImage(input);
+        return { success: true, data: result };
+    } catch (error) {
+        console.error(error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { success: false, error: `Failed to generate image: ${errorMessage}` };
     }
 }

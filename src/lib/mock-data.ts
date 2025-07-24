@@ -8,7 +8,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/alex@example.com.png',
     department: 'Dev',
     role: 'super_admin',
-    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4'],
+    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5'],
   },
   {
     id: 'user-2',
@@ -35,7 +35,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/sarah@example.com.png',
     department: 'Marketing',
     role: 'department_admin',
-    assignedTools: ['tool-1', 'tool-4'],
+    assignedTools: ['tool-1', 'tool-4', 'tool-5'],
   },
     {
     id: 'user-5',
@@ -74,6 +74,7 @@ export const mockTools: Tool[] = [
     launchUrl: 'https://chat.openai.com/',
     description: 'A powerful language model for conversation, content creation, and more.',
     type: 'Web-based',
+    category: 'Web-based',
     status: 'active',
     assignedDepartments: ['Dev', 'Marketing'],
     assignedUsers: ['user-1'],
@@ -85,6 +86,7 @@ export const mockTools: Tool[] = [
     launchUrl: 'https://fireflies.ai/',
     description: 'AI assistant for your meetings. Records, transcribes, and analyzes voice conversations.',
     type: 'Web-based',
+    category: 'Web-based',
     status: 'active',
     assignedDepartments: ['Sales'],
     assignedUsers: ['user-1'],
@@ -96,6 +98,7 @@ export const mockTools: Tool[] = [
     launchUrl: 'https://www.notion.so/product/ai',
     description: 'AI features integrated into the Notion workspace for writing, summarizing, and brainstorming.',
     type: 'API-integrated',
+    category: 'Text',
     status: 'active',
     assignedDepartments: ['Dev'],
     assignedUsers: ['user-1'],
@@ -107,10 +110,23 @@ export const mockTools: Tool[] = [
     launchUrl: 'https://www.midjourney.com/',
     description: 'An independent research lab exploring new mediums of thought and expanding the imaginative powers of the human species.',
     type: 'Web-based',
+    category: 'Web-based',
     status: 'inactive',
     assignedDepartments: [],
     assignedUsers: ['user-1', 'user-2', 'user-4'],
   },
+  {
+    id: 'tool-5',
+    name: 'Image Generator',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=IMG',
+    launchUrl: '',
+    description: 'Generate high-quality images from text descriptions using a powerful AI model.',
+    type: 'API-integrated',
+    category: 'Image',
+    status: 'active',
+    assignedDepartments: ['Marketing'],
+    assignedUsers: ['user-1', 'user-4'],
+  }
 ];
 
 export const mockLogs: Log[] = [
