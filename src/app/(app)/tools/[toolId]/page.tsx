@@ -9,8 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
-import { runGenericPlaygroundAction, generateImageAction } from "@/app/actions"
-import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon } from "lucide-react"
+import { runGenericPlaygroundAction, generateImageAction, generateAudioAction } from "@/app/actions"
+import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon, Mic } from "lucide-react"
 import Image from "next/image"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
@@ -18,7 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 type Message = {
   role: 'user' | 'assistant'
-  content: string | { imageUrl: string }
+  content: string | { imageUrl: string } | { audioUrl: string }
 }
 
 export default function ToolPlaygroundPage() {
@@ -49,6 +49,8 @@ export default function ToolPlaygroundPage() {
         let initialMessage = `Hello! I'm ${foundTool.name}. How can I help you today?`
         if (foundTool.category === 'Image') {
           initialMessage = `Hello! I'm ${foundTool.name}. Describe the image you want me to create.`
+        } else if (foundTool.category === 'Audio') {
+            initialMessage = `Hello! I'm ${foundTool.name}. Enter the text you want me to narrate.`
         }
         setMessages([
           { role: 'assistant', content: initialMessage }
@@ -87,6 +89,13 @@ export default function ToolPlaygroundPage() {
         } else {
           throw new Error(result.error || "Failed to generate image.")
         }
+      } else if (tool.category === 'Audio') {
+        const result = await generateAudioAction({ prompt: currentPrompt })
+        if (result.success && result.data) {
+          setMessages([...newMessages, { role: 'assistant', content: { audioUrl: result.data.audioUrl } }])
+        } else {
+            throw new Error(result.error || "Failed to generate audio.")
+        }
       } else {
         const result = await runGenericPlaygroundAction({ prompt: currentPrompt, toolName: tool.name })
         if (result.success && result.data) {
@@ -111,6 +120,28 @@ export default function ToolPlaygroundPage() {
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('');
   }
+  
+  const getIconForCategory = (category: Tool['category']) => {
+      switch (category) {
+          case 'Image':
+              return <ImageIcon className="h-4 w-4" />;
+          case 'Audio':
+              return <Mic className="h-4 w-4" />;
+          default:
+              return <Send className="h-4 w-4" />;
+      }
+  }
+  
+   const getPlaceholderForCategory = (category: Tool['category']) => {
+        switch (category) {
+            case 'Image':
+                return "A photo of a cat sitting on a windowsill...";
+            case 'Audio':
+                return "Type the text to convert to speech...";
+            default:
+                return "Type your message here...";
+        }
+   }
 
   if (pageLoading) {
     return (
@@ -171,9 +202,11 @@ export default function ToolPlaygroundPage() {
                   <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content !== 'string' ? 'p-0' : 'px-4 py-3'}`}>
                     {typeof message.content === 'string' ? (
                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    ) : (
+                    ) : 'imageUrl' in message.content ? (
                       <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />
-                    )}
+                    ) : 'audioUrl' in message.content ? (
+                      <audio controls src={message.content.audioUrl} className="w-full" />
+                    ) : null}
                   </div>
 
                    {message.role === 'user' && user && (
@@ -203,14 +236,14 @@ export default function ToolPlaygroundPage() {
           <div className="flex w-full items-center space-x-2">
             <Input 
                 id="prompt" 
-                placeholder={tool.category === 'Image' ? "A photo of a cat sitting on a windowsill..." : "Type your message here..."}
+                placeholder={getPlaceholderForCategory(tool.category)}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
                 disabled={loading}
             />
             <Button onClick={handleSend} disabled={loading || !prompt.trim()}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (tool.category === 'Image' ? <ImageIcon className="h-4 w-4" /> : <Send className="h-4 w-4" />)}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : getIconForCategory(tool.category)}
                 <span className="sr-only">Send</span>
             </Button>
           </div>
