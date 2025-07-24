@@ -8,7 +8,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/alex@example.com.png',
     department: 'Dev',
     role: 'super_admin',
-    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6', 'tool-7'],
+    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4'],
   },
   {
     id: 'user-2',
@@ -17,7 +17,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/maria@example.com.png',
     department: 'Marketing',
     role: 'employee',
-    assignedTools: ['tool-4'],
+    assignedTools: ['tool-1'],
   },
   {
     id: 'user-3',
@@ -26,7 +26,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/david@example.com.png',
     department: 'Sales',
     role: 'employee',
-    assignedTools: [],
+    assignedTools: ['tool-2'],
   },
   {
     id: 'user-4',
@@ -35,7 +35,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/sarah@example.com.png',
     department: 'Marketing',
     role: 'department_admin',
-    assignedTools: ['tool-1', 'tool-4', 'tool-5', 'tool-7'],
+    assignedTools: ['tool-1', 'tool-4'],
   },
     {
     id: 'user-5',
@@ -93,8 +93,8 @@ export const mockTools: Tool[] = [
   },
   {
     id: 'tool-3',
-    name: 'Muse',
-    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=M',
+    name: 'Content Assistant',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=CA',
     launchUrl: '',
     description: 'AI-powered assistant for writing, summarizing, and brainstorming with documents and images.',
     type: 'API-integrated',
@@ -117,8 +117,8 @@ export const mockTools: Tool[] = [
   },
   {
     id: 'tool-5',
-    name: 'Artisan',
-    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=ART',
+    name: 'Image Generator',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=IG',
     launchUrl: '',
     description: 'Generate high-quality images from text descriptions using a powerful AI model.',
     type: 'API-integrated',
@@ -129,8 +129,8 @@ export const mockTools: Tool[] = [
   },
   {
     id: 'tool-6',
-    name: 'Scribe',
-    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=S',
+    name: 'Document Generator',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=DG',
     launchUrl: '',
     description: 'Create structured documents like reports or essays from a prompt. The output is in Markdown and can be copied or downloaded.',
     type: 'API-integrated',
@@ -141,8 +141,8 @@ export const mockTools: Tool[] = [
   },
   {
     id: 'tool-7',
-    name: 'DataGrid',
-    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=DG',
+    name: 'CSV Generator',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=CSG',
     launchUrl: '',
     description: 'Generate tabular data in CSV format from a text prompt. The result can be downloaded and opened in any spreadsheet application.',
     type: 'API-integrated',
@@ -193,7 +193,7 @@ export const mockLogs: Log[] = [
    {
     id: 'log-5',
     toolId: 'tool-6',
-    toolName: 'Scribe',
+    toolName: 'Document Generator',
     userId: 'user-1',
     userName: 'Alex Johnson',
     department: 'Dev',
@@ -202,7 +202,7 @@ export const mockLogs: Log[] = [
     {
     id: 'log-6',
     toolId: 'tool-5',
-    toolName: 'Artisan',
+    toolName: 'Image Generator',
     userId: 'user-4',
     userName: 'Sarah Lee',
     department: 'Marketing',

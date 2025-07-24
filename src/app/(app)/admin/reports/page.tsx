@@ -76,14 +76,14 @@ export default function AdminReportsPage() {
 
   return (
     <div className="container mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-headline text-3xl font-bold">Productivity Reports</h1>
           <p className="text-muted-foreground">Analyze tool usage across departments.</p>
         </div>
         {(currentUser?.role === 'super_admin' || currentUser?.role === 'management') && (
           <Select onValueChange={setSelectedDepartment} value={selectedDepartment}>
-            <SelectTrigger className="w-full md:w-[240px]">
+            <SelectTrigger className="w-[240px]">
               <SelectValue placeholder="Select Department" />
             </SelectTrigger>
             <SelectContent>

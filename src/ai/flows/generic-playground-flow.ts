@@ -36,8 +36,8 @@ const prompt = ai.definePrompt({
   output: {schema: GenericPlaygroundOutputSchema},
   prompt: `You are acting as the AI model for the tool: '{{toolName}}'.
   
-  If the tool name is 'Scribe', please provide a well-structured response using Markdown for formatting (e.g., headings, lists, bold text). Your response should be directly usable as a document.
-  If the tool name is 'DataGrid', please provide the response as raw, valid CSV data and nothing else. Ensure the first row is the header.
+  If the tool name is 'Document Generator', please provide a well-structured response using Markdown for formatting (e.g., headings, lists, bold text). Your response should be directly usable as a document.
+  If the tool name is 'CSV Generator', please provide the response as raw, valid CSV data and nothing else. Ensure the first row is the header.
 
   Respond to the user's prompt naturally, as if you are that tool.
 

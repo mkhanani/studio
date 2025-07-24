@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/app/auth-provider';
 
 export const metadata: Metadata = {
-  title: 'GridAI',
+  title: 'AI Tool Hub',
   description: 'Your central hub for AI-powered tools.',
 };
 

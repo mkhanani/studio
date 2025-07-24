@@ -81,7 +81,7 @@ export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFo
             <FormItem>
               <FormLabel>Tool Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Scribe" {...field} readOnly={!isSuperAdmin} />
+                <Input placeholder="e.g., Content Assistant" {...field} readOnly={!isSuperAdmin} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -100,7 +100,7 @@ export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFo
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="iconUrl"
@@ -134,7 +134,7 @@ export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFo
               )}
             />
         </div>
-         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="type"
@@ -186,7 +186,7 @@ export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFo
               )}
             />
         </div>
-         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="status"
