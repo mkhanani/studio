@@ -68,10 +68,11 @@ export function SidebarNav() {
             (item) =>
               item.roles.includes(user?.role || 'employee') && (
                 <SidebarMenuItem key={item.href}>
-                  <Link href={item.href} legacyBehavior passHref>
+                  <Link href={item.href} passHref>
                     <SidebarMenuButton
                       isActive={isActive(item.href)}
                       tooltip={item.label}
+                      as="div"
                     >
                       <item.icon />
                       <span>{item.label}</span>
@@ -88,10 +89,11 @@ export function SidebarNav() {
             <SidebarMenu>
               {adminMenuItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <Link href={item.href} legacyBehavior passHref>
+                  <Link href={item.href} passHref>
                     <SidebarMenuButton
                       isActive={isActive(item.href)}
                       tooltip={item.label}
+                      as="div"
                     >
                       <item.icon />
                       <span>{item.label}</span>
