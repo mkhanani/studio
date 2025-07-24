@@ -9,21 +9,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
-import { runGenericPlaygroundAction, generateImageAction } from "@/app/actions"
+import { runGenericPlaygroundAction, generateImageAction, generateAudioAction } from "@/app/actions"
 import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon, Paperclip, X, Mic, MicOff, Copy, Download } from "lucide-react"
 import Image from "next/image"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-type MessageContent = string | { imageUrl: string } | { prompt: string; file: { name: string, dataUri: string } };
+type MessageContent = string | { imageUrl: string } | { audioUrl: string } | { prompt: string; file: { name: string, dataUri: string } };
 
 type Message = {
   role: 'user' | 'assistant';
   content: MessageContent;
 };
 
-// Add this type definition for the Speech Recognition API
 interface CustomWindow extends Window {
   SpeechRecognition?: any;
   webkitSpeechRecognition?: any;
@@ -51,7 +50,7 @@ export default function ToolPlaygroundPage() {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (tools.length === 0) return; // Wait for tools to be loaded
+    if (tools.length === 0) return; 
 
     const foundTool = tools.find(t => t.id === toolId)
     if (foundTool) {
@@ -62,8 +61,12 @@ export default function ToolPlaygroundPage() {
         let initialMessage = `Hello! I'm ${foundTool.name}. How can I help you today?`
         if (foundTool.category === 'Image') {
           initialMessage = `Hello! I'm ${foundTool.name}. Describe the image you want me to create.`
+        } else if (foundTool.category === 'Audio') {
+           initialMessage = `Hello! I'm ${foundTool.name}. Enter the text you want me to convert to speech.`
         } else if (foundTool.name === 'Document Generator') {
             initialMessage = "Hello! Describe the document you want me to generate. I can create reports, emails, summaries, and more, complete with Markdown formatting."
+        } else if (foundTool.name === 'CSV Generator') {
+            initialMessage = "Hello! Describe the data you want me to generate. I'll create it in CSV format, ready for any spreadsheet software."
         }
         setMessages([
           { role: 'assistant', content: initialMessage }
@@ -118,12 +121,6 @@ export default function ToolPlaygroundPage() {
           .join('');
         setPrompt(transcript);
       };
-    } else {
-        toast({
-          variant: "destructive",
-          title: "Unsupported Browser",
-          description: "Your browser does not support voice recognition.",
-        });
     }
 
     return () => {
@@ -165,30 +162,44 @@ export default function ToolPlaygroundPage() {
     }
 
     try {
-      if (tool.category === 'Image') {
-        const result = await generateImageAction({ prompt: currentPrompt })
-        if (result.success && result.data) {
-          setMessages([...newMessages, { role: 'assistant', content: { imageUrl: result.data.imageUrl } }])
-        } else {
-          throw new Error(result.error || "Failed to generate image.")
-        }
-      } else {
-        const result = await runGenericPlaygroundAction({ 
-          prompt: currentPrompt, 
-          toolName: tool.name,
-          fileDataUri: currentFile?.dataUri,
-        })
-        if (result.success && result.data) {
-          setMessages([...newMessages, { role: 'assistant', content: result.data.response }])
-        } else {
-          throw new Error(result.error || "Failed to get a response from the AI.")
-        }
+      let result;
+      switch (tool.category) {
+        case 'Image':
+          result = await generateImageAction({ prompt: currentPrompt });
+          if (result.success && result.data) {
+            setMessages([...newMessages, { role: 'assistant', content: { imageUrl: result.data.imageUrl } }]);
+          } else {
+            throw new Error(result.error || "Failed to generate image.");
+          }
+          break;
+        case 'Audio':
+          result = await generateAudioAction({ prompt: currentPrompt });
+          if (result.success && result.data?.audioUrl) {
+            setMessages([...newMessages, { role: 'assistant', content: { audioUrl: result.data.audioUrl } }]);
+          } else {
+            throw new Error(result.error || "Failed to generate audio.");
+          }
+          break;
+        case 'Text':
+        case 'Web-based': // Should be handled, but as a fallback
+        default:
+          result = await runGenericPlaygroundAction({ 
+            prompt: currentPrompt, 
+            toolName: tool.name,
+            fileDataUri: currentFile?.dataUri,
+          });
+          if (result.success && result.data) {
+            setMessages([...newMessages, { role: 'assistant', content: result.data.response }]);
+          } else {
+            throw new Error(result.error || "Failed to get a response from the AI.");
+          }
+          break;
       }
     } catch (e: any) {
       const errorMessage = e.message || "An unexpected error occurred.";
       setError(errorMessage)
-      setMessages(newMessages) // Keep the user's message even if the call fails
-       toast({
+      // Do not clear the user's message on failure, but show the error
+      toast({
         variant: "destructive",
         title: "Error",
         description: errorMessage,
@@ -206,6 +217,8 @@ export default function ToolPlaygroundPage() {
       switch (category) {
           case 'Image':
               return <ImageIcon className="h-4 w-4" />;
+          case 'Audio':
+              return <Mic className="h-4 w-4" />;
           default:
               return <Send className="h-4 w-4" />;
       }
@@ -215,6 +228,8 @@ export default function ToolPlaygroundPage() {
         switch (category) {
             case 'Image':
                 return "A photo of a cat sitting on a windowsill...";
+            case 'Audio':
+                return "Type the text to convert to speech...";
             default:
                 return "Type your message or attach a file...";
         }
@@ -241,11 +256,18 @@ export default function ToolPlaygroundPage() {
   }
 
   if (!tool) {
-    // This case should ideally not be reached if error handling is correct
     return null;
   }
   
   const toggleListening = () => {
+    if (!recognitionRef.current) {
+        toast({
+          variant: "destructive",
+          title: "Unsupported Browser",
+          description: "Your browser does not support voice recognition.",
+        });
+        return;
+    }
     if (isListening) {
       recognitionRef.current?.stop();
     } else {
@@ -261,8 +283,12 @@ export default function ToolPlaygroundPage() {
     });
   };
 
-  const handleDownload = (text: string, filename: string) => {
-    const blob = new Blob([text], { type: 'text/plain' });
+  const handleDownload = (text: string) => {
+    const isCsv = tool?.name === 'CSV Generator';
+    const filename = `${tool?.name}-output.${isCsv ? 'csv' : 'txt'}`;
+    const mimeType = isCsv ? 'text/csv' : 'text/plain';
+    
+    const blob = new Blob([text], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -285,7 +311,7 @@ export default function ToolPlaygroundPage() {
                         <Copy className="h-3 w-3" />
                         <span className="sr-only">Copy</span>
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDownload(message.content as string, `${tool?.name}-output.txt`)}>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDownload(message.content as string)}>
                         <Download className="h-3 w-3" />
                         <span className="sr-only">Download</span>
                     </Button>
@@ -296,6 +322,9 @@ export default function ToolPlaygroundPage() {
     }
     if ('imageUrl' in message.content) {
       return <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />;
+    }
+    if ('audioUrl' in message.content) {
+        return <audio controls src={message.content.audioUrl} className="w-full" />;
     }
     if ('file' in message.content) {
       const isImage = message.content.file.dataUri.startsWith('data:image');
@@ -349,7 +378,7 @@ export default function ToolPlaygroundPage() {
                     </Avatar>
                   )}
                   
-                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content === 'object' && !('imageUrl' in message.content) && !('prompt' in message.content) ? 'p-0' : 'px-4 py-3'}`}>
+                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content === 'object' && !('file' in message.content) ? 'p-0' : 'px-4 py-3'}`}>
                      {renderMessageContent(message)}
                   </div>
 
@@ -372,6 +401,13 @@ export default function ToolPlaygroundPage() {
                             <Loader2 className="h-5 w-5 animate-spin text-primary" />
                         </div>
                     </div>
+                )}
+                 {error && !loading && (
+                    <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Generation Failed</AlertTitle>
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
                 )}
              </div>
           </ScrollArea>

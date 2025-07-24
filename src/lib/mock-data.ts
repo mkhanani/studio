@@ -8,7 +8,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/alex@example.com.png',
     department: 'Dev',
     role: 'super_admin',
-    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'],
+    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6', 'tool-7'],
   },
   {
     id: 'user-2',
@@ -35,7 +35,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/sarah@example.com.png',
     department: 'Marketing',
     role: 'department_admin',
-    assignedTools: ['tool-1', 'tool-4', 'tool-5'],
+    assignedTools: ['tool-1', 'tool-4', 'tool-5', 'tool-7'],
   },
     {
     id: 'user-5',
@@ -137,6 +137,18 @@ export const mockTools: Tool[] = [
     category: 'Text',
     status: 'active',
     assignedDepartments: ['Dev', 'Marketing', 'Sales'],
+    assignedUsers: [],
+  },
+  {
+    id: 'tool-7',
+    name: 'CSV Generator',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=CSV',
+    launchUrl: '',
+    description: 'Generate tabular data in CSV format from a text prompt. The result can be downloaded and opened in any spreadsheet application.',
+    type: 'API-integrated',
+    category: 'Text',
+    status: 'active',
+    assignedDepartments: ['Sales', 'Marketing'],
     assignedUsers: [],
   },
 ];
