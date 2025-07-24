@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ToolCard } from '@/components/tool-card';
 import useMockDb from '@/hooks/use-mock-db';
 import { useAuth } from '@/hooks/use-auth';
 import type { Tool } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -61,6 +62,13 @@ export default function DashboardPage() {
     });
   }
 
+  const categorizedTools = useMemo(() => {
+    return {
+      apiIntegrated: visibleTools.filter(tool => tool.type === 'API-integrated'),
+      webBased: visibleTools.filter(tool => tool.type === 'Web-based'),
+    };
+  }, [visibleTools]);
+
   return (
     <div className="container mx-auto">
       <div className="mb-8">
@@ -69,10 +77,34 @@ export default function DashboardPage() {
       </div>
       
       {visibleTools.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {visibleTools.map((tool) => (
-            <ToolCard key={tool.id} tool={tool} onLaunch={handleLaunch} />
-          ))}
+        <div className="space-y-12">
+            {categorizedTools.apiIntegrated.length > 0 && (
+                <section>
+                    <h2 className="font-headline text-2xl font-semibold mb-1">API-Integrated Tools</h2>
+                    <p className="text-muted-foreground mb-4">These tools are built directly into the AI Tool Hub for a seamless experience.</p>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {categorizedTools.apiIntegrated.map((tool) => (
+                            <ToolCard key={tool.id} tool={tool} onLaunch={handleLaunch} />
+                        ))}
+                    </div>
+                </section>
+            )}
+
+             {categorizedTools.webBased.length > 0 && categorizedTools.apiIntegrated.length > 0 && (
+                <Separator />
+            )}
+
+            {categorizedTools.webBased.length > 0 && (
+                 <section>
+                    <h2 className="font-headline text-2xl font-semibold mb-1">Web-based Tools</h2>
+                    <p className="text-muted-foreground mb-4">These tools will open in a new browser tab.</p>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {categorizedTools.webBased.map((tool) => (
+                            <ToolCard key={tool.id} tool={tool} onLaunch={handleLaunch} />
+                        ))}
+                    </div>
+                </section>
+            )}
         </div>
       ) : (
          <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/50 p-12 text-center">
