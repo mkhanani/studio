@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
 import { runGenericPlaygroundAction, generateImageAction } from "@/app/actions"
-import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon, Paperclip, X } from "lucide-react"
+import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon, Paperclip, X, Mic, MicOff } from "lucide-react"
 import Image from "next/image"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
@@ -22,6 +22,12 @@ type Message = {
   role: 'user' | 'assistant';
   content: MessageContent;
 };
+
+// Add this type definition for the Speech Recognition API
+interface CustomWindow extends Window {
+  SpeechRecognition?: any;
+  webkitSpeechRecognition?: any;
+}
 
 export default function ToolPlaygroundPage() {
   const params = useParams()
@@ -38,6 +44,8 @@ export default function ToolPlaygroundPage() {
   const [pageLoading, setPageLoading] = useState(true);
   const [attachedFile, setAttachedFile] = useState<{name: string, dataUri: string} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
 
   const scrollAreaRef = useRef<HTMLDivElement>(null)
@@ -73,6 +81,55 @@ export default function ToolPlaygroundPage() {
         });
     }
   }, [messages])
+  
+   useEffect(() => {
+    const customWindow = window as CustomWindow;
+    const SpeechRecognition = customWindow.SpeechRecognition || customWindow.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognitionRef.current.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+        toast({
+          variant: "destructive",
+          title: "Voice Error",
+          description: `Speech recognition error: ${event.error}`,
+        });
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result) => result.transcript)
+          .join('');
+        setPrompt(transcript);
+      };
+    } else {
+        toast({
+          variant: "destructive",
+          title: "Unsupported Browser",
+          description: "Your browser does not support voice recognition.",
+        });
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [toast]);
 
  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -185,6 +242,15 @@ export default function ToolPlaygroundPage() {
     // This case should ideally not be reached if error handling is correct
     return null;
   }
+  
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+    }
+    setIsListening(!isListening);
+  };
 
   const renderMessageContent = (message: Message) => {
     if (typeof message.content === 'string') {
@@ -294,12 +360,16 @@ export default function ToolPlaygroundPage() {
                 <Input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
                 <Input 
                     id="prompt" 
-                    placeholder={getPlaceholderForCategory(tool.category)}
+                    placeholder={isListening ? "Listening..." : getPlaceholderForCategory(tool.category)}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
                     disabled={loading}
                 />
+                <Button variant="outline" size="icon" onClick={toggleListening} disabled={loading}>
+                    {isListening ? <MicOff className="h-4 w-4 text-destructive" /> : <Mic className="h-4 w-4" />}
+                    <span className="sr-only">Toggle Microphone</span>
+                </Button>
                 <Button onClick={handleSend} disabled={loading || (!prompt.trim() && !attachedFile)}>
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : getIconForCategory(tool.category)}
                     <span className="sr-only">Send</span>
