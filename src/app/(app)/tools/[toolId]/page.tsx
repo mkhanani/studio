@@ -199,7 +199,7 @@ export default function ToolPlaygroundPage() {
                     </Avatar>
                   )}
                   
-                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content !== 'string' ? 'p-0' : 'px-4 py-3'}`}>
+                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content !== 'string' || (typeof message.content === 'string' && message.content.trim() === '') ? 'p-0' : 'px-4 py-3'}`}>
                     {typeof message.content === 'string' ? (
                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     ) : 'imageUrl' in message.content ? (
