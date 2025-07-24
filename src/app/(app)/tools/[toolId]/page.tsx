@@ -61,9 +61,9 @@ export default function ToolPlaygroundPage() {
         let initialMessage = `Hello! I'm ${foundTool.name}. How can I help you today?`
         if (foundTool.category === 'Image') {
           initialMessage = `Hello! I'm ${foundTool.name}. Describe the image you want me to create.`
-        } else if (foundTool.name === 'Document Generator') {
+        } else if (foundTool.name === 'Scribe') {
             initialMessage = "Hello! Describe the document you want me to generate. I can create reports, emails, summaries, and more, complete with Markdown formatting."
-        } else if (foundTool.name === 'CSV Generator') {
+        } else if (foundTool.name === 'DataGrid') {
             initialMessage = "Hello! Describe the data you want me to generate. I'll create it in CSV format, ready for any spreadsheet software."
         }
         setMessages([
@@ -270,8 +270,8 @@ export default function ToolPlaygroundPage() {
   };
 
   const handleDownload = (text: string) => {
-    const isCsv = tool?.name === 'CSV Generator';
-    const filename = `${tool?.name}-output.${isCsv ? 'csv' : 'txt'}`;
+    const isCsv = tool?.name === 'DataGrid';
+    const filename = `GridAI-${tool?.name}-output.${isCsv ? 'csv' : 'txt'}`;
     const mimeType = isCsv ? 'text/csv' : 'text/plain';
     
     const blob = new Blob([text], { type: mimeType });
@@ -283,6 +283,15 @@ export default function ToolPlaygroundPage() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const handleImageDownload = (imageUrl: string) => {
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = `GridAI-${tool?.name}-Image.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
 
@@ -307,7 +316,17 @@ export default function ToolPlaygroundPage() {
       );
     }
     if ('imageUrl' in message.content) {
-      return <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />;
+      return (
+         <div className="relative group">
+            <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />
+            <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-black/50 rounded-bl-lg p-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={() => handleImageDownload(message.content.imageUrl)}>
+                    <Download className="h-4 w-4" />
+                    <span className="sr-only">Download Image</span>
+                </Button>
+            </div>
+        </div>
+      )
     }
     if ('audioUrl' in message.content) {
         return <audio controls src={message.content.audioUrl} className="w-full" />;
@@ -364,7 +383,7 @@ export default function ToolPlaygroundPage() {
                     </Avatar>
                   )}
                   
-                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content === 'object' && !('file' in message.content) && !('audioUrl' in message.content) ? 'p-0' : 'px-4 py-3'}`}>
+                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content === 'object' && !('file' in message.content) && !('audioUrl' in message.content) ? 'p-0 bg-transparent' : 'px-4 py-3'}`}>
                      {renderMessageContent(message)}
                   </div>
 

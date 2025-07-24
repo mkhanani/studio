@@ -81,7 +81,7 @@ export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFo
             <FormItem>
               <FormLabel>Tool Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., ChatGPT" {...field} readOnly={!isSuperAdmin} />
+                <Input placeholder="e.g., Scribe" {...field} readOnly={!isSuperAdmin} />
               </FormControl>
               <FormMessage />
             </FormItem>
