@@ -9,7 +9,7 @@ import {
   Wrench,
   FileText,
   Lightbulb,
-  Shield,
+  BarChart3,
   LifeBuoy,
 } from 'lucide-react';
 
@@ -56,6 +56,11 @@ export function SidebarNav() {
       href: '/admin/insights',
       label: 'AI Insights',
       icon: Lightbulb,
+    },
+     {
+      href: '/admin/reports',
+      label: 'Reports',
+      icon: BarChart3,
     },
   ];
 
