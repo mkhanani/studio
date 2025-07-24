@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
 import { runGenericPlaygroundAction } from "@/app/actions"
-import { Loader2, Send, Bot, User as UserIcon } from "lucide-react"
+import { Loader2, Send, Bot, User as UserIcon, AlertTriangle } from "lucide-react"
 import Image from "next/image"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
@@ -33,14 +33,16 @@ export default function ToolPlaygroundPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pageLoading, setPageLoading] = useState(true);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (tools.length === 0) return; // Wait for tools to be loaded
+
     const foundTool = tools.find(t => t.id === toolId)
     if (foundTool) {
       if (foundTool.type === 'Web-based') {
-        // Redirect or show an error if trying to access a web-based tool here
         setError("This tool is web-based and does not have an integrated playground.")
       } else {
         setTool(foundTool)
@@ -51,6 +53,7 @@ export default function ToolPlaygroundPage() {
     } else {
       setError("Tool not found.")
     }
+    setPageLoading(false);
   }, [toolId, tools])
 
   useEffect(() => {
@@ -96,24 +99,31 @@ export default function ToolPlaygroundPage() {
     return name.split(' ').map(n => n[0]).join('');
   }
 
+  if (pageLoading) {
+    return (
+        <div className="container mx-auto flex items-center justify-center h-[calc(100vh-100px)]">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
+
   if (error) {
      return (
-        <div className="container mx-auto flex items-center justify-center h-full">
+        <div className="container mx-auto flex items-center justify-center h-[calc(100vh-100px)]">
             <Alert variant="destructive" className="max-w-lg">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
             </Alert>
         </div>
      )
   }
 
   if (!tool) {
-    return (
-        <div className="container mx-auto flex items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-    )
+    // This case should ideally not be reached if error handling is correct
+    return null;
   }
+
 
   return (
     <div className="container mx-auto h-[calc(100vh-100px)] flex flex-col">
