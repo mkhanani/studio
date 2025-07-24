@@ -91,7 +91,7 @@ export default function ToolPlaygroundPage() {
         }
       } else if (tool.category === 'Audio') {
         const result = await generateAudioAction({ prompt: currentPrompt })
-        if (result.success && result.data) {
+        if (result.success && result.data?.audioUrl) {
           setMessages([...newMessages, { role: 'assistant', content: { audioUrl: result.data.audioUrl } }])
         } else {
             throw new Error(result.error || "Failed to generate audio.")
@@ -105,12 +105,13 @@ export default function ToolPlaygroundPage() {
         }
       }
     } catch (e: any) {
-      setError(e.message)
+      const errorMessage = e.message || "An unexpected error occurred.";
+      setError(errorMessage)
       setMessages(newMessages) // Keep the user's message even if the call fails
        toast({
         variant: "destructive",
         title: "Error",
-        description: e.message,
+        description: errorMessage,
       })
     } finally {
       setLoading(false)
@@ -151,7 +152,7 @@ export default function ToolPlaygroundPage() {
     )
   }
 
-  if (error) {
+  if (error && !tool) {
      return (
         <div className="container mx-auto flex items-center justify-center h-[calc(100vh-100px)]">
             <Alert variant="destructive" className="max-w-lg">
