@@ -22,7 +22,8 @@ type Message = {
 }
 
 export default function ToolPlaygroundPage() {
-  const { toolId } = useParams()
+  const params = useParams()
+  const toolId = Array.isArray(params.toolId) ? params.toolId[0] : params.toolId;
   const { tools } = useMockDb()
   const { user } = useAuth()
   const { toast } = useToast()
