@@ -8,7 +8,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/alex@example.com.png',
     department: 'Dev',
     role: 'super_admin',
-    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'],
+    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5'],
   },
   {
     id: 'user-2',
@@ -35,7 +35,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/sarah@example.com.png',
     department: 'Marketing',
     role: 'department_admin',
-    assignedTools: ['tool-1', 'tool-4', 'tool-5', 'tool-6'],
+    assignedTools: ['tool-1', 'tool-4', 'tool-5'],
   },
     {
     id: 'user-5',
@@ -127,18 +127,6 @@ export const mockTools: Tool[] = [
     assignedDepartments: ['Marketing'],
     assignedUsers: ['user-1', 'user-4'],
   },
-  {
-    id: 'tool-6',
-    name: 'Voiceover Generator',
-    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=AUD',
-    launchUrl: '',
-    description: 'Convert text into natural-sounding speech for voiceovers and narration.',
-    type: 'API-integrated',
-    category: 'Audio',
-    status: 'active',
-    assignedDepartments: ['Marketing'],
-    assignedUsers: ['user-1', 'user-4'],
-  }
 ];
 
 export const mockLogs: Log[] = [

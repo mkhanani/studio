@@ -26,7 +26,7 @@ const formSchema = z.object({
   iconUrl: z.string().url("Must be a valid URL."),
   launchUrl: z.string().optional(),
   type: z.enum(['Web-based', 'API-integrated']),
-  category: z.enum(['Text', 'Image', 'Audio', 'Web-based']),
+  category: z.enum(['Text', 'Image', 'Web-based']),
   status: z.enum(['active', 'inactive']),
   assignedDepartments: z.array(z.string()),
   assignedUsers: z.array(z.string()),
@@ -62,7 +62,7 @@ export function ToolForm({ onSubmit, users, currentUser, defaultValues }: ToolFo
   })
   
   const departments = ['Marketing' , 'HR' , 'Dev' , 'Sales' , 'Unassigned'];
-  const categories: ToolCategory[] = ['Text', 'Image', 'Audio', 'Web-based'];
+  const categories: ToolCategory[] = ['Text', 'Image', 'Web-based'];
 
   const visibleUsers = currentUser?.role === 'super_admin'
     ? users

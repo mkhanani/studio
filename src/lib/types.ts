@@ -1,6 +1,6 @@
 
 export type UserRole = 'super_admin' | 'management' | 'department_admin' | 'employee';
-export type ToolCategory = 'Text' | 'Image' | 'Audio' | 'Web-based';
+export type ToolCategory = 'Text' | 'Image' | 'Web-based';
 
 export interface User {
   id: string;

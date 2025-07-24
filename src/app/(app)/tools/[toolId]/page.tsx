@@ -9,8 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
-import { runGenericPlaygroundAction, generateImageAction, generateAudioAction } from "@/app/actions"
-import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon, Mic } from "lucide-react"
+import { runGenericPlaygroundAction, generateImageAction } from "@/app/actions"
+import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon } from "lucide-react"
 import Image from "next/image"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
@@ -18,7 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 type Message = {
   role: 'user' | 'assistant'
-  content: string | { imageUrl: string } | { audioUrl: string }
+  content: string | { imageUrl: string }
 }
 
 export default function ToolPlaygroundPage() {
@@ -49,8 +49,6 @@ export default function ToolPlaygroundPage() {
         let initialMessage = `Hello! I'm ${foundTool.name}. How can I help you today?`
         if (foundTool.category === 'Image') {
           initialMessage = `Hello! I'm ${foundTool.name}. Describe the image you want me to create.`
-        } else if (foundTool.category === 'Audio') {
-            initialMessage = `Hello! I'm ${foundTool.name}. Enter the text you want me to narrate.`
         }
         setMessages([
           { role: 'assistant', content: initialMessage }
@@ -89,13 +87,6 @@ export default function ToolPlaygroundPage() {
         } else {
           throw new Error(result.error || "Failed to generate image.")
         }
-      } else if (tool.category === 'Audio') {
-        const result = await generateAudioAction({ prompt: currentPrompt })
-        if (result.success && result.data?.audioUrl) {
-          setMessages([...newMessages, { role: 'assistant', content: { audioUrl: result.data.audioUrl } }])
-        } else {
-            throw new Error(result.error || "Failed to generate audio.")
-        }
       } else {
         const result = await runGenericPlaygroundAction({ prompt: currentPrompt, toolName: tool.name })
         if (result.success && result.data) {
@@ -126,8 +117,6 @@ export default function ToolPlaygroundPage() {
       switch (category) {
           case 'Image':
               return <ImageIcon className="h-4 w-4" />;
-          case 'Audio':
-              return <Mic className="h-4 w-4" />;
           default:
               return <Send className="h-4 w-4" />;
       }
@@ -137,8 +126,6 @@ export default function ToolPlaygroundPage() {
         switch (category) {
             case 'Image':
                 return "A photo of a cat sitting on a windowsill...";
-            case 'Audio':
-                return "Type the text to convert to speech...";
             default:
                 return "Type your message here...";
         }
@@ -205,8 +192,6 @@ export default function ToolPlaygroundPage() {
                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     ) : message.content && 'imageUrl' in message.content ? (
                       <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />
-                    ) : message.content && 'audioUrl' in message.content ? (
-                      <audio controls src={message.content.audioUrl} className="w-full" />
                     ) : null}
                   </div>
 
