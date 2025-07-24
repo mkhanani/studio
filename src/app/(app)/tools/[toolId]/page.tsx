@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
-import { runGenericPlaygroundAction, generateImageAction, generateAudioAction } from "@/app/actions"
+import { runGenericPlaygroundAction, generateImageAction } from "@/app/actions"
 import { Loader2, Send, Bot, User as UserIcon, AlertTriangle, Image as ImageIcon, Paperclip, X, Mic, MicOff, Copy, Download } from "lucide-react"
 import Image from "next/image"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -61,8 +61,6 @@ export default function ToolPlaygroundPage() {
         let initialMessage = `Hello! I'm ${foundTool.name}. How can I help you today?`
         if (foundTool.category === 'Image') {
           initialMessage = `Hello! I'm ${foundTool.name}. Describe the image you want me to create.`
-        } else if (foundTool.category === 'Audio') {
-           initialMessage = `Hello! I'm ${foundTool.name}. Enter the text you want me to convert to speech.`
         } else if (foundTool.name === 'Document Generator') {
             initialMessage = "Hello! Describe the document you want me to generate. I can create reports, emails, summaries, and more, complete with Markdown formatting."
         } else if (foundTool.name === 'CSV Generator') {
@@ -172,14 +170,6 @@ export default function ToolPlaygroundPage() {
             throw new Error(result.error || "Failed to generate image.");
           }
           break;
-        case 'Audio':
-          result = await generateAudioAction({ prompt: currentPrompt });
-          if (result.success && result.data?.audioUrl) {
-            setMessages([...newMessages, { role: 'assistant', content: { audioUrl: result.data.audioUrl } }]);
-          } else {
-            throw new Error(result.error || "Failed to generate audio.");
-          }
-          break;
         case 'Text':
         case 'Web-based': // Should be handled, but as a fallback
         default:
@@ -217,8 +207,6 @@ export default function ToolPlaygroundPage() {
       switch (category) {
           case 'Image':
               return <ImageIcon className="h-4 w-4" />;
-          case 'Audio':
-              return <Mic className="h-4 w-4" />;
           default:
               return <Send className="h-4 w-4" />;
       }
@@ -228,8 +216,6 @@ export default function ToolPlaygroundPage() {
         switch (category) {
             case 'Image':
                 return "A photo of a cat sitting on a windowsill...";
-            case 'Audio':
-                return "Type the text to convert to speech...";
             default:
                 return "Type your message or attach a file...";
         }
@@ -378,7 +364,7 @@ export default function ToolPlaygroundPage() {
                     </Avatar>
                   )}
                   
-                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content === 'object' && !('file' in message.content) ? 'p-0' : 'px-4 py-3'}`}>
+                  <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content === 'object' && !('file' in message.content) && !('audioUrl' in message.content) ? 'p-0' : 'px-4 py-3'}`}>
                      {renderMessageContent(message)}
                   </div>
 
