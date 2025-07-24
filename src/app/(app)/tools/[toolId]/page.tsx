@@ -337,7 +337,7 @@ export default function ToolPlaygroundPage() {
   return (
     <div className="container mx-auto h-[calc(100vh-100px)] flex flex-col">
       <Card className="flex-1 flex flex-col">
-        <CardHeader className="flex flex-row items-center gap-4">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
            <Image
               src={tool.iconUrl}
               alt={`${tool.name} icon`}

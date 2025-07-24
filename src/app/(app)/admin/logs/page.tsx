@@ -67,14 +67,14 @@ export default function AdminLogsPage() {
           <h1 className="font-headline text-3xl font-bold">Usage Logs</h1>
           <p className="text-muted-foreground">Review tool launch events across the organization.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-2">
            <Popover>
             <PopoverTrigger asChild>
               <Button
                 id="date"
                 variant={"outline"}
                 className={cn(
-                  "w-[300px] justify-start text-left font-normal",
+                  "w-full justify-start text-left font-normal md:w-[300px]",
                   !date && "text-muted-foreground"
                 )}
               >
@@ -104,7 +104,7 @@ export default function AdminLogsPage() {
               />
             </PopoverContent>
           </Popover>
-          <Button onClick={exportToCSV}>
+          <Button onClick={exportToCSV} className="w-full sm:w-auto">
               <Download className="mr-2 h-4 w-4" /> Export CSV
           </Button>
         </div>

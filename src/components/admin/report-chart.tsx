@@ -18,7 +18,7 @@ interface ReportChartProps {
 
 export function ReportChart({ data, config }: ReportChartProps) {
   return (
-    <div className="h-[400px] w-full">
+    <div className="h-[400px] min-h-[300px] w-full">
        <ChartContainer config={config} className="min-h-[200px] w-full">
         <BarChart accessibilityLayer data={data}>
           <CartesianGrid vertical={false} />
