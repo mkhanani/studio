@@ -1,3 +1,4 @@
+
 import { AuthGuard } from "@/components/auth-guard";
 import { Header } from "@/components/header";
 import { SidebarNav } from "@/components/sidebar-nav";
@@ -8,6 +9,7 @@ import {
   SidebarContent,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import { LayoutGrid } from "lucide-react";
 
 const GridAiLogo = () => (
     <svg
@@ -16,7 +18,7 @@ const GridAiLogo = () => (
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="text-primary"
+      className="text-foreground"
     >
       <path
         fillRule="evenodd"
@@ -80,7 +82,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Sidebar>
           <SidebarHeader>
              <div className="flex items-center gap-2 p-2">
-                <GridAiLogo />
+                <LayoutGrid className="h-8 w-8 text-foreground" />
                 <h2 className="font-headline text-xl font-semibold">GridAI</h2>
              </div>
           </SidebarHeader>
