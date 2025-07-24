@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string) => boolean;
   logout: () => void;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +26,11 @@ export const AuthProviderComponent = ({ children }: { children: ReactNode }) => 
     }
     setLoading(false);
   }, []);
+  
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    sessionStorage.setItem('authUser', JSON.stringify(updatedUser));
+  }
 
   const login = (email: string): boolean => {
     setLoading(true);
@@ -45,7 +51,7 @@ export const AuthProviderComponent = ({ children }: { children: ReactNode }) => 
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

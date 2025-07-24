@@ -5,6 +5,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string;
   department: 'Marketing' | 'HR' | 'Dev' | 'Sales' | 'Unassigned';
   role: UserRole;
   assignedTools: string[]; // Array of tool IDs

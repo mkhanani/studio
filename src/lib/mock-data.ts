@@ -1,4 +1,3 @@
-
 import type { User, Tool, Log } from './types';
 
 export const mockUsers: User[] = [
@@ -6,14 +5,16 @@ export const mockUsers: User[] = [
     id: 'user-1',
     name: 'Alex Johnson',
     email: 'alex@example.com',
+    avatarUrl: 'https://avatar.vercel.sh/alex@example.com.png',
     department: 'Dev',
     role: 'super_admin',
-    assignedTools: [],
+    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4'],
   },
   {
     id: 'user-2',
     name: 'Maria Garcia',
     email: 'maria@example.com',
+    avatarUrl: 'https://avatar.vercel.sh/maria@example.com.png',
     department: 'Marketing',
     role: 'employee',
     assignedTools: ['tool-4'],
@@ -22,6 +23,7 @@ export const mockUsers: User[] = [
     id: 'user-3',
     name: 'David Smith',
     email: 'david@example.com',
+    avatarUrl: 'https://avatar.vercel.sh/david@example.com.png',
     department: 'Sales',
     role: 'employee',
     assignedTools: [],
@@ -30,16 +32,36 @@ export const mockUsers: User[] = [
     id: 'user-4',
     name: 'Sarah Lee',
     email: 'sarah@example.com',
+    avatarUrl: 'https://avatar.vercel.sh/sarah@example.com.png',
     department: 'Marketing',
     role: 'department_admin',
-    assignedTools: [],
+    assignedTools: ['tool-1', 'tool-4'],
   },
     {
     id: 'user-5',
     name: 'Tom Brown',
     email: 'tom@example.com',
+    avatarUrl: 'https://avatar.vercel.sh/tom@example.com.png',
     department: 'Unassigned',
     role: 'management',
+    assignedTools: [],
+  },
+  {
+    id: 'user-6',
+    name: 'Dev Employee',
+    email: 'dev.employee@example.com',
+    avatarUrl: 'https://avatar.vercel.sh/dev.employee@example.com.png',
+    department: 'Dev',
+    role: 'employee',
+    assignedTools: [],
+  },
+  {
+    id: 'user-7',
+    name: 'HR Admin',
+    email: 'hr.admin@example.com',
+    avatarUrl: 'https://avatar.vercel.sh/hr.admin@example.com.png',
+    department: 'HR',
+    role: 'department_admin',
     assignedTools: [],
   },
 ];
@@ -54,7 +76,7 @@ export const mockTools: Tool[] = [
     type: 'Web-based',
     status: 'active',
     assignedDepartments: ['Dev', 'Marketing'],
-    assignedUsers: [],
+    assignedUsers: ['user-1'],
   },
   {
     id: 'tool-2',
@@ -65,7 +87,7 @@ export const mockTools: Tool[] = [
     type: 'Web-based',
     status: 'active',
     assignedDepartments: ['Sales'],
-    assignedUsers: [],
+    assignedUsers: ['user-1'],
   },
   {
     id: 'tool-3',
@@ -76,7 +98,7 @@ export const mockTools: Tool[] = [
     type: 'API-integrated',
     status: 'active',
     assignedDepartments: ['Dev'],
-    assignedUsers: [],
+    assignedUsers: ['user-1'],
   },
   {
     id: 'tool-4',
@@ -87,7 +109,7 @@ export const mockTools: Tool[] = [
     type: 'Web-based',
     status: 'inactive',
     assignedDepartments: [],
-    assignedUsers: ['user-2'],
+    assignedUsers: ['user-1', 'user-2', 'user-4'],
   },
 ];
 
@@ -118,5 +140,14 @@ export const mockLogs: Log[] = [
     userName: 'Alex Johnson',
     department: 'Dev',
     timestamp: new Date('2023-10-27T14:00:00Z'),
+  },
+    {
+    id: 'log-4',
+    toolId: 'tool-4',
+    toolName: 'Midjourney',
+    userId: 'user-4',
+    userName: 'Sarah Lee',
+    department: 'Marketing',
+    timestamp: new Date('2023-10-28T14:00:00Z'),
   },
 ];

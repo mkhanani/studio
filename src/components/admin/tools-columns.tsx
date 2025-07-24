@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Tool } from "@/lib/types"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
@@ -13,7 +13,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export const columns: ColumnDef<Tool>[] = [
+type ColumnsConfig = {
+  onEdit: (tool: Tool) => void;
+  canManageTools: boolean;
+}
+
+
+export const columns = ({ onEdit, canManageTools }: ColumnsConfig): ColumnDef<Tool>[] => [
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -37,7 +43,8 @@ export const columns: ColumnDef<Tool>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as string
-      return <Badge variant={status === 'active' ? "default" : "outline"} className={status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/30' : ''}>{status}</Badge>
+      const isActive = status === 'active';
+      return <Badge variant={isActive ? "default" : "outline"} className={isActive ? 'bg-green-600/20 text-green-400 border-green-500/30 hover:bg-green-600/30' : 'capitalize'}>{status}</Badge>
     }
   },
   {
@@ -45,7 +52,11 @@ export const columns: ColumnDef<Tool>[] = [
     header: "Departments",
     cell: ({ row }) => {
       const depts = row.getValue("assignedDepartments") as string[]
+      if (depts.length === 0) return <span className="text-muted-foreground">None</span>
       return <div className="flex flex-wrap gap-1">{depts.map(d => <Badge key={d} variant="secondary">{d}</Badge>)}</div>
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
     },
   },
    {
@@ -61,6 +72,8 @@ export const columns: ColumnDef<Tool>[] = [
     cell: ({ row }) => {
       const tool = row.original
  
+      if (!canManageTools) return null;
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -71,13 +84,11 @@ export const columns: ColumnDef<Tool>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(tool.id)}
-            >
-              Copy tool ID
+             <DropdownMenuItem onClick={() => onEdit(tool)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit Tool
             </DropdownMenuItem>
-             <DropdownMenuItem>Edit Tool</DropdownMenuItem>
-             <DropdownMenuItem className="text-destructive">Delete Tool</DropdownMenuItem>
+             <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">Delete Tool</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useAuth } from "@/hooks/use-auth"
@@ -8,9 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import React, { useState } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Pencil } from "lucide-react"
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth()
+  const { user, logout, updateUser } = useAuth()
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '')
 
   if (!user) {
     return null // Or a loading state
@@ -20,10 +24,19 @@ export default function ProfilePage() {
     return name.split(' ').map(n => n[0]).join('');
   }
 
-  const handleAvatarUpload = () => {
-    // This would trigger a file picker and upload logic
-    alert("Avatar customization coming soon!");
+  const handleAvatarSave = () => {
+    updateUser({ ...user, avatarUrl });
+    setIsAvatarDialogOpen(false);
   };
+  
+  const handleNameSave = (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const newName = formData.get("name") as string;
+      if (newName && newName !== user.name) {
+        updateUser({ ...user, name: newName });
+      }
+  }
 
   return (
     <div className="container mx-auto">
@@ -36,15 +49,40 @@ export default function ProfilePage() {
         <div className="md:col-span-1">
           <Card>
             <CardHeader className="items-center text-center">
-              <div className="relative">
-                <Avatar className="h-24 w-24 text-3xl">
-                  <AvatarImage src={`https://avatar.vercel.sh/${user.email}.png`} alt={user.name} />
-                  <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                </Avatar>
-                <Button size="icon" className="absolute bottom-0 right-0 h-8 w-8 rounded-full" onClick={handleAvatarUpload}>
-                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.22 2.15a.72.72 0 0 0-.22-.5.72.72 0 0 0-.5-.22H1.5a.72.72 0 0 0-.5.22.72.72 0 0 0-.22.5v11a.72.72 0 0 0 .22.5c.14.14.32.22.5.22h12a.72.72 0 0 0 .5-.22.72.72 0 0 0 .22-.5v-11ZM9.5 4.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm-4 5.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-1Z"/></svg>
-                </Button>
-              </div>
+               <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
+                <DialogTrigger asChild>
+                   <div className="relative cursor-pointer">
+                    <Avatar className="h-24 w-24 text-3xl">
+                      <AvatarImage src={user.avatarUrl} alt={user.name} />
+                      <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                    </Avatar>
+                     <div className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary/80 text-primary-foreground backdrop-blur-sm">
+                        <Pencil className="h-4 w-4" />
+                     </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Change Avatar</DialogTitle>
+                    <DialogDescription>
+                      Enter a new image URL for your avatar. For best results, use a square image.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-2">
+                    <Label htmlFor="avatar-url">Image URL</Label>
+                    <Input 
+                      id="avatar-url"
+                      value={avatarUrl}
+                      onChange={(e) => setAvatarUrl(e.target.value)}
+                      placeholder="https://example.com/image.png"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsAvatarDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleAvatarSave}>Save</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
               <CardTitle className="font-headline mt-4 text-2xl">{user.name}</CardTitle>
               <CardDescription>
                 <Badge variant={user.role === 'super_admin' ? "destructive" : "secondary"}>{user.role.replace('_', ' ')}</Badge>
@@ -62,9 +100,10 @@ export default function ProfilePage() {
                 <CardDescription>Update your account details here. Password changes are not yet available.</CardDescription>
              </CardHeader>
              <CardContent className="space-y-6">
+               <form onSubmit={handleNameSave} className="space-y-6">
                 <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" defaultValue={user.name} />
+                    <Input id="name" name="name" defaultValue={user.name} />
                 </div>
                  <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
@@ -74,7 +113,8 @@ export default function ProfilePage() {
                     <Label htmlFor="department">Department</Label>
                     <Input id="department" defaultValue={user.department} readOnly />
                 </div>
-                <Button>Save Changes</Button>
+                <Button type="submit">Save Changes</Button>
+                </form>
              </CardContent>
            </Card>
         </div>
