@@ -44,7 +44,7 @@ export async function generateAudioAction(input: GenerateAudioInput) {
         return { success: true, data: result };
     } catch (error) {
         console.error(error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-        return { success: false, error: `Failed to generate audio: ${errorMessage}` };
+        const errorMessage = error instanceof Error ? error.message : 'Audio generation failed.';
+        return { success: false, error: errorMessage };
     }
 }
