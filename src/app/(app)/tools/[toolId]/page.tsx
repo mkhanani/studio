@@ -203,9 +203,9 @@ export default function ToolPlaygroundPage() {
                   <div className={`rounded-lg max-w-lg ${message.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'} ${typeof message.content !== 'string' || (typeof message.content === 'string' && message.content.trim() === '') ? 'p-0' : 'px-4 py-3'}`}>
                     {typeof message.content === 'string' ? (
                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    ) : 'imageUrl' in message.content ? (
+                    ) : message.content && 'imageUrl' in message.content ? (
                       <Image src={message.content.imageUrl} alt="Generated Image" width={512} height={512} className="rounded-lg" />
-                    ) : 'audioUrl' in message.content ? (
+                    ) : message.content && 'audioUrl' in message.content ? (
                       <audio controls src={message.content.audioUrl} className="w-full" />
                     ) : null}
                   </div>
