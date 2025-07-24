@@ -14,12 +14,18 @@ interface ToolCardProps {
 
 export function ToolCard({ tool, onLaunch }: ToolCardProps) {
   const handleLaunch = () => {
+    if (tool.status !== 'active') return;
     onLaunch(tool);
     window.open(tool.launchUrl, '_blank', 'noopener,noreferrer');
   };
 
+  const isActive = tool.status === 'active';
+
   return (
-    <Card className="flex h-full transform flex-col transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20">
+    <Card className={cn(
+      "flex h-full transform flex-col transition-all duration-300",
+      isActive ? "hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20" : "opacity-60 bg-muted/50"
+    )}>
       <CardHeader className="flex flex-row items-start gap-4">
         <Image
           src={tool.iconUrl}
@@ -38,10 +44,16 @@ export function ToolCard({ tool, onLaunch }: ToolCardProps) {
         <p className="text-sm text-muted-foreground">{tool.description}</p>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Badge variant={tool.status === 'active' ? 'default' : 'secondary'} className={tool.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/30' : ''}>
+        <Badge 
+          variant={isActive ? "default" : "destructive"} 
+          className={cn(
+            isActive ? 'bg-green-600/20 text-green-400 border-green-500/30' : 'border-transparent bg-destructive/80 text-destructive-foreground',
+            "capitalize"
+            )}
+        >
           {tool.status}
         </Badge>
-        <Button size="sm" onClick={handleLaunch} disabled={tool.status !== 'active'}>
+        <Button size="sm" onClick={handleLaunch} disabled={!isActive}>
           Launch
           <ArrowUpRight className="ml-2 h-4 w-4" />
         </Button>

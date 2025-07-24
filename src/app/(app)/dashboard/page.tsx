@@ -16,13 +16,23 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       const userTools = tools.filter(tool => {
-        if (tool.status !== 'active') return false;
-        if (user.role === 'admin') return true;
+        // Super admins see all tools regardless of assignment
+        if (user.role === 'super_admin') return true;
+        
+        // Department admins see tools assigned to their department
+        if (user.role === 'department_admin' && tool.assignedDepartments.includes(user.department)) {
+          return true;
+        }
 
-        const assignedToUser = tool.assignedUsers.includes(user.id);
-        const assignedToDepartment = tool.assignedDepartments.includes(user.department);
+        // All users see tools specifically assigned to them
+        if(tool.assignedUsers.includes(user.id)) return true;
 
-        return assignedToUser || assignedToDepartment;
+        // Employees see tools assigned to their department, but only if the tool is active
+        if(user.role === 'employee' && tool.assignedDepartments.includes(user.department) && tool.status === 'active') {
+          return true;
+        }
+
+        return false;
       });
       setVisibleTools(userTools);
     }
@@ -30,6 +40,14 @@ export default function DashboardPage() {
   
   const handleLaunch = (tool: Tool) => {
     if(!user) return;
+    if (tool.status !== 'active') {
+        toast({
+            variant: "destructive",
+            title: `${tool.name} is inactive`,
+            description: 'This tool is currently unavailable.',
+        });
+        return;
+    }
     addLog({
         toolId: tool.id,
         toolName: tool.name,
