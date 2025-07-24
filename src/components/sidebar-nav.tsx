@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -31,7 +32,7 @@ export function SidebarNav() {
       href: '/dashboard',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      roles: ['employee', 'admin'],
+      roles: ['employee', 'department_admin', 'management', 'super_admin'],
     },
   ];
 
@@ -59,6 +60,7 @@ export function SidebarNav() {
   ];
 
   const isActive = (path: string) => pathname === path;
+  const isAdmin = user && ['super_admin', 'management', 'department_admin'].includes(user.role);
 
   return (
     <div className="flex h-full flex-col">
@@ -68,37 +70,37 @@ export function SidebarNav() {
             (item) =>
               item.roles.includes(user?.role || 'employee') && (
                 <SidebarMenuItem key={item.href}>
-                  <Link href={item.href} passHref>
                     <SidebarMenuButton
+                      asChild
                       isActive={isActive(item.href)}
                       tooltip={item.label}
-                      as="div"
                     >
-                      <item.icon />
-                      <span>{item.label}</span>
+                     <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
                     </SidebarMenuButton>
-                  </Link>
                 </SidebarMenuItem>
               )
           )}
         </SidebarMenu>
 
-        {user?.role === 'admin' && (
+        {isAdmin && (
           <>
             <SidebarGroupLabel className="mt-4">Admin</SidebarGroupLabel>
             <SidebarMenu>
               {adminMenuItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <Link href={item.href} passHref>
                     <SidebarMenuButton
+                      asChild
                       isActive={isActive(item.href)}
                       tooltip={item.label}
-                      as="div"
                     >
-                      <item.icon />
-                      <span>{item.label}</span>
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
                     </SidebarMenuButton>
-                  </Link>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

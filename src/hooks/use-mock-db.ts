@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -17,8 +18,21 @@ const useMockDb = () => {
     };
     setLogs(prevLogs => [newLog, ...prevLogs]);
   };
+
+  const addUser = (user: Omit<User, 'id' | 'assignedTools'>) => {
+    const newUser: User = {
+      ...user,
+      id: `user-${Date.now()}`,
+      assignedTools: [],
+    };
+    setUsers(prevUsers => [newUser, ...prevUsers]);
+  };
+
+  const removeUser = (userId: string) => {
+    setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+  };
   
-  return { users, tools, logs, addLog, setUsers, setTools, setLogs };
+  return { users, tools, logs, addLog, setUsers, setTools, setLogs, addUser, removeUser };
 };
 
 export default useMockDb;

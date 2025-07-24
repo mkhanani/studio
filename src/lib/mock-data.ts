@@ -1,3 +1,4 @@
+
 import type { User, Tool, Log } from './types';
 
 export const mockUsers: User[] = [
@@ -6,7 +7,7 @@ export const mockUsers: User[] = [
     name: 'Alex Johnson',
     email: 'alex@example.com',
     department: 'Dev',
-    role: 'admin',
+    role: 'super_admin',
     assignedTools: [],
   },
   {
@@ -23,6 +24,22 @@ export const mockUsers: User[] = [
     email: 'david@example.com',
     department: 'Sales',
     role: 'employee',
+    assignedTools: [],
+  },
+  {
+    id: 'user-4',
+    name: 'Sarah Lee',
+    email: 'sarah@example.com',
+    department: 'Marketing',
+    role: 'department_admin',
+    assignedTools: [],
+  },
+    {
+    id: 'user-5',
+    name: 'Tom Brown',
+    email: 'tom@example.com',
+    department: 'Unassigned',
+    role: 'management',
     assignedTools: [],
   },
 ];
