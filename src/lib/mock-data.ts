@@ -8,7 +8,7 @@ export const mockUsers: User[] = [
     avatarUrl: 'https://avatar.vercel.sh/alex@example.com.png',
     department: 'Dev',
     role: 'super_admin',
-    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5'],
+    assignedTools: ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'],
   },
   {
     id: 'user-2',
@@ -126,6 +126,18 @@ export const mockTools: Tool[] = [
     status: 'active',
     assignedDepartments: ['Marketing'],
     assignedUsers: ['user-1', 'user-4'],
+  },
+  {
+    id: 'tool-6',
+    name: 'Document Generator',
+    iconUrl: 'https://placehold.co/100x100/815FAD/FFFFFF.png?text=DOC',
+    launchUrl: '',
+    description: 'Create structured documents like reports, proposals, or essays from a simple prompt.',
+    type: 'API-integrated',
+    category: 'Text',
+    status: 'active',
+    assignedDepartments: ['Dev', 'Marketing', 'Sales'],
+    assignedUsers: [],
   },
 ];
 
