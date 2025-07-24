@@ -118,7 +118,7 @@ export function SidebarNav() {
             <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Help">
                     <LifeBuoy />
-                    <span>Help & Support</span>
+                    N<span>Help & Support</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
          </SidebarMenu>

@@ -240,10 +240,6 @@ export default function ToolPlaygroundPage() {
         </div>
      )
   }
-
-  if (!tool) {
-    return null;
-  }
   
   const toggleListening = () => {
     if (!recognitionRef.current) {
