@@ -8,7 +8,7 @@ import {
   SidebarContent,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { Bot } from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +17,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Sidebar>
           <SidebarHeader>
              <div className="flex items-center gap-2 p-2">
-                <Bot className="h-8 w-8 text-primary" />
+                <LayoutGrid className="h-8 w-8 text-primary" />
                 <h2 className="font-headline text-xl font-semibold">GridAI</h2>
              </div>
           </SidebarHeader>
