@@ -61,7 +61,7 @@ export default function LoginPage() {
         <div className="mx-auto mb-4 rounded-full bg-primary/10 p-3">
             <KeyRound className="h-8 w-8 text-primary"/>
         </div>
-        <CardTitle className="font-headline text-2xl">AI Tool Hub</CardTitle>
+        <CardTitle className="font-headline text-2xl">GridAI</CardTitle>
         <CardDescription>Enter your email to sign in to your account</CardDescription>
       </CardHeader>
       <CardContent>

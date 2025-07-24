@@ -18,7 +18,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarHeader>
              <div className="flex items-center gap-2 p-2">
                 <Bot className="h-8 w-8 text-primary" />
-                <h2 className="font-headline text-xl font-semibold">AI Tool Hub</h2>
+                <h2 className="font-headline text-xl font-semibold">GridAI</h2>
              </div>
           </SidebarHeader>
           <SidebarContent>

@@ -81,7 +81,7 @@ export default function DashboardPage() {
             {categorizedTools.apiIntegrated.length > 0 && (
                 <section>
                     <h2 className="font-headline text-2xl font-semibold mb-1">API-Integrated Tools</h2>
-                    <p className="text-muted-foreground mb-4">These tools are built directly into the AI Tool Hub for a seamless experience.</p>
+                    <p className="text-muted-foreground mb-4">These tools are built directly into GridAI for a seamless experience.</p>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {categorizedTools.apiIntegrated.map((tool) => (
                             <ToolCard key={tool.id} tool={tool} onLaunch={handleLaunch} />
